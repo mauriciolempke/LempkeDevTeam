@@ -1,0 +1,11 @@
+{
+  "name": "lempke-dev-team",
+  "version": "1.0.0",
+  "description": "A suite of 12 specialized Claude Code agents for full-cycle application development",
+  "author": {
+    "name": "Mauricio Lempke"
+  },
+  "repository": "https://github.com/mauriciolempke/LempkeDevTeam",
+  "license": "MIT",
+  "keywords": ["development", "agents", "project-management", "architecture", "ux", "devops"]
+}
