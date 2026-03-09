@@ -1,0 +1,9 @@
+{
+  "plugins": [
+    {
+      "name": "lempke-dev-team",
+      "description": "A suite of 12 specialized Claude Code agents for full-cycle application development",
+      "path": "."
+    }
+  ]
+}
