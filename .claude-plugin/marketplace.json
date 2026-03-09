@@ -1,9 +1,17 @@
 {
+  "name": "lempke-dev-team",
+  "owner": {
+    "name": "Mauricio Lempke"
+  },
   "plugins": [
     {
       "name": "lempke-dev-team",
+      "source": "./",
       "description": "A suite of 12 specialized Claude Code agents for full-cycle application development",
-      "path": "."
+      "version": "1.0.0",
+      "author": {
+        "name": "Mauricio Lempke"
+      }
     }
   ]
 }
