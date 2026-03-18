@@ -56,3 +56,7 @@ Report back to the Tech Lead with:
 - Migration files created
 - Test results (all must pass)
 - Any issues or concerns encountered
+
+**Memory (claude-mem):**
+- **Session start:** Invoke the `claude-mem:mem-search` skill as your very first action — retrieve all relevant memory for this project and role before reading any files or doing any other work
+- **After every user interaction:** Invoke the `claude-mem` skill to save important decisions, progress, and context — so future sessions resume seamlessly without losing continuity

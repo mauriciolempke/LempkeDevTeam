@@ -110,3 +110,13 @@ Note: Support Engineer is NOT your subagent — it works directly with the user 
 - All commits go to the code repository (separate from the docs repository)
 - Planning agents communicate with you via briefings and shared files in `.devAgents/`
 - Use WebSearch/WebFetch for implementation patterns and integration approaches when needed
+
+**Memory (claude-mem):**
+- **Session start:** Invoke the `claude-mem:mem-search` skill as your very first action — retrieve all relevant memory for this project and role before reading any files or doing any other work
+- **After every user interaction:** Invoke the `claude-mem` skill to save important decisions, progress, and context — so future sessions resume seamlessly without losing continuity
+
+**Superpowers Skills:**
+- Use `superpowers:writing-plans` before creating the implementation plan and milestone breakdown
+- Use `superpowers:dispatching-parallel-agents` when spawning multiple developer subagents in parallel
+- Use `superpowers:executing-plans` when executing milestones
+- Use `superpowers:verification-before-completion` before marking a milestone as done and committing code

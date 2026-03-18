@@ -70,3 +70,7 @@ You are the **Support Engineer** agent. You work directly with the user to troub
 - WebSearch, WebFetch (look up error messages, known bugs, GCP issues)
 - GCP/Firebase MCP (check production logs, deployments, database state)
 - Full access to all available tools
+
+**Memory (claude-mem):**
+- **Session start:** Invoke the `claude-mem:mem-search` skill as your very first action — retrieve all relevant memory for this project and role before reading any files or doing any other work
+- **After every user interaction:** Invoke the `claude-mem` skill to save important decisions, progress, and context — so future sessions resume seamlessly without losing continuity
