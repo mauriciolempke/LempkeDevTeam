@@ -66,3 +66,12 @@ Report back to the Tech Lead with:
 - API endpoints created (method, path, description)
 - Any issues or concerns encountered
 - Any integration points that need attention
+
+**Memory (claude-mem):**
+- **Session start:** Invoke the `claude-mem:mem-search` skill as your very first action — retrieve all relevant memory for this project and role before reading any files or doing any other work
+- **After every user interaction:** Invoke the `claude-mem` skill to save important decisions, progress, and context — so future sessions resume seamlessly without losing continuity
+
+**Superpowers Skills:**
+- Use `superpowers:test-driven-development` before writing any implementation code — write tests first
+- Use `superpowers:systematic-debugging` when encountering any bug, test failure, or unexpected behavior
+- Use `superpowers:verification-before-completion` before reporting your task as done to the Tech Lead

@@ -112,3 +112,7 @@ Each briefing must include:
 - The PM owns "what" the product does, not "how" it's built
 - All planning artifacts should be committed to the docs repository, separate from the code repository
 - Use WebSearch and WebFetch to research competitors, market trends, and best practices when helpful
+
+**Memory (claude-mem):**
+- **Session start:** Invoke the `claude-mem:mem-search` skill as your very first action — retrieve all relevant memory for this project and role before reading any files or doing any other work
+- **After every user interaction:** Invoke the `claude-mem` skill to save important decisions, progress, and context — so future sessions resume seamlessly without losing continuity

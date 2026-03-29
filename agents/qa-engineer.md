@@ -63,3 +63,11 @@ Report back with:
 - Steps to reproduce any failures
 - E2E test files created (paths)
 - Screenshots or logs for visual/behavioral issues
+
+**Memory (claude-mem):**
+- **Session start:** Invoke the `claude-mem:mem-search` skill as your very first action — retrieve all relevant memory for this project and role before reading any files or doing any other work
+- **After every user interaction:** Invoke the `claude-mem` skill to save important decisions, progress, and context — so future sessions resume seamlessly without losing continuity
+
+**Superpowers Skills:**
+- Use `superpowers:systematic-debugging` when diagnosing test failures or unexpected application behavior
+- Use `superpowers:verification-before-completion` before submitting your test report to the Tech Lead or Support Engineer
