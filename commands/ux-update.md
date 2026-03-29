@@ -1,54 +1,51 @@
 ---
 name: ux-update
-description: Re-read Figma after design changes and update all UX artifacts
+description: Re-read Figma after design changes and update all UX artifacts — now handled by the PM agent
 ---
 
-Activate the **UX Designer** role. Read the agent definition from `agents/ux-designer.md`.
+Activate the **Project Manager** role. Read the agent definition from `agents/project-manager.md`.
+
+> UX design is now part of the PM agent's responsibilities. This command runs the UX Designer phase only — useful for standalone Figma re-reads or UX artifact updates without going through the full PM change flow.
 
 1. Read `.devAgents/ux-designer-notes.md` for context and previous Figma URL
 
-## Step 1 — Source the work from Solus
+## Step 1 — Determine scope
 
-**If the user provided explicit design instructions as arguments**, skip to Step 2 and treat those as the design brief.
+**If the user provided explicit design instructions as arguments**, use those as the design brief and skip to Step 2.
 
-**Otherwise**, query the Solus database via MCP to find what needs UX design:
-
+**Otherwise**, ask the user:
 ```
-list_features(project_id: DEFAULT_PROJECT_ID, status: "wip")
-list_ideas(project_id: DEFAULT_PROJECT_ID, status: "planned")
+What would you like to update?
+  a) Re-read Figma and sync all UX artifacts to the latest design
+  b) Update UX artifacts for a specific CR (list available CRs)
+  c) Something else — describe it
 ```
 
-- Group the planned ideas by `feature_id` to compute a count per feature.
-- Present a numbered list of all WIP features, at every depth level, with their planned idea count:
-  ```
-  WIP Features with planned ideas:
-  1. [Feature name] (depth 0) — 3 planned ideas
-  2.   [Sub-feature name] (depth 1, under "Feature name") — 1 planned idea
-  3. ...
-  ```
-  Show indentation to reflect nesting (depth × 2 spaces).
-- Ask the user to pick a feature, or press Enter to skip straight to re-reading Figma.
+## Step 2 — UX design update
 
-**If the user picks a feature:**
-- Show the planned ideas for that feature:
-  ```
-  Planned ideas in "[Feature name]":
-  1. [Idea name] — [description excerpt]
-  2. ...
-  Which idea should be designed?
-  ```
-- Fetch the full idea via `get_idea(idea_id)` — use its name, description, and plan content as the design brief.
-- Proceed to Step 2 with that idea as context.
+1. Re-read the Figma project via Figma MCP server
+2. Compare the updated design against the previous version and PM spec
+3. Identify all differences: new screens, removed features, changed flows, new components, design system changes
 
-**If the user skips:**
-- Proceed to Step 2 without a specific idea context (full Figma re-read mode).
+**Apply the Confirmation Rule for significant changes:**
+```
+I've identified a significant UX change:
+[describe the change]
+This would affect: [list of screens/components/flows]
+Do you want to proceed?
+```
+Wait for explicit user confirmation before writing anything significant.
 
-## Step 2 — Design update
+4. Once confirmed (or for minor changes, proceed directly):
+   - Update affected screen specs in `.devAgents/ux/screen-specs/`
+   - Update `.devAgents/ux/component-spec.md` if new/changed components
+   - Update `.devAgents/ux/design-system.md` if token or style changes
+   - Update `.devAgents/ux/navigation-map.md` if routing changed
+   - Update `.devAgents/ux/design-diff.md` with what changed and why
+   - Update `frontend-dev-brief.md` to reflect the latest UX requirements
+5. If changes affect PM scope (new features added or removed) — note this and suggest running `/pm-change`
+6. If changes affect architecture (new data requirements, new API surfaces) — note this and suggest running `/arch-review-cr`
+7. Update `ux-designer-notes.md`
 
-2. Re-read the Figma project via MCP
-3. Compare updated design against previous version and PM spec (and selected idea if applicable)
-4. Update all UX artifacts with the latest design
-5. Update `design-diff.md` with new differences
-6. Update `frontend-dev-brief.md`
-7. If changes affect PM or Architect scope, create appropriate change documents
-8. Update `ux-designer-notes.md`
+## Step 3 — Wrap up
+- Summarize what was updated and what (if anything) needs follow-up from PM or Architect

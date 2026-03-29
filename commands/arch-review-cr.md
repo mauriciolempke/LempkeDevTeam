@@ -1,55 +1,44 @@
 ---
 name: arch-review-cr
-description: Review a change request for architectural impact
+description: Review a change request for architectural impact — now handled by the PM agent
 ---
 
-Activate the **Architect** role. Read the agent definition from `agents/architect.md`.
+Activate the **Project Manager** role. Read the agent definition from `agents/project-manager.md`.
+
+> Architecture review is now part of the PM agent's responsibilities. This command runs the Architect phase only — useful when you need a standalone architectural review without going through the full PM change flow.
 
 1. Read `.devAgents/architect-notes.md` for current architecture context
+2. Read `.devAgents/architecture.md` and relevant rules files in `.devAgents/rules/`
 
-## Step 1 — Source the work from Solus
+## Step 1 — Identify CRs to review
 
-Query the Solus database via MCP to find what needs architectural review:
+List all files in `.devAgents/changes/` and identify any where architectural impact has not yet been assessed.
 
-```
-list_features(project_id: DEFAULT_PROJECT_ID, status: "wip")
-list_ideas(project_id: DEFAULT_PROJECT_ID, status: "planned")
-```
+If no unreviewed CRs exist, inform the user and stop.
 
-- Group the planned ideas by `feature_id` to compute a count per feature.
-- Present a numbered list of all WIP features, at every depth level, with their planned idea count:
-  ```
-  WIP Features with planned ideas:
-  1. [Feature name] (depth 0) — 3 planned ideas
-  2.   [Sub-feature name] (depth 1, under "Feature name") — 1 planned idea
-  3. ...
-  ```
-  Show indentation to reflect nesting (depth × 2 spaces).
-- Ask the user to pick a feature, or press Enter to skip and process `.devAgents/changes/` CRs instead.
+## Step 2 — Assess architectural impact (per CR)
 
-**If the user picks a feature:**
-- Show the planned ideas for that feature:
-  ```
-  Planned ideas in "[Feature name]":
-  1. [Idea name] — [description excerpt]
-  2. ...
-  Which idea should be architecturally reviewed?
-  ```
-- Record the selected idea's `id` and details as the subject for this session.
-- Treat the selected idea as the change request to assess (proceed to Step 2).
-
-**If the user skips:**
-- Fall back to reading `.devAgents/changes/` for unprocessed CRs.
-
-## Step 2 — Assess architectural impact
-
-For the selected idea (or each unprocessed CR from `.devAgents/changes/`):
-  a. Read the full idea details via `get_idea(idea_id)`
-  b. Assess architectural impact: **No Impact** / **Minor Adjustment** / **Significant Change**
+For each unreviewed CR:
+  a. Read the full CR document
+  b. Assess impact: **No Impact** / **Minor Adjustment** / **Significant Change**
   c. If impact detected, explain what needs to change and why
-  d. If significant change, recommend recreating the codebase from scratch
+  d. **Apply the Confirmation Rule for Significant Changes:**
+     ```
+     I've identified a significant architectural change:
+     [describe the change]
+     This would affect: [list of services/schemas/patterns/rules]
+     [If warranted: This may require recreating parts of the codebase from scratch]
+     Do you want to proceed?
+     ```
+  e. Wait for explicit user confirmation before writing any artifacts
 
 ## Step 3 — Update artifacts
-4. Update `architect-notes.md` with the assessment
-5. If architecture changes are needed, update: architecture doc, rules files, guides as appropriate
-6. Inform the user of the assessment and recommended actions
+
+Once confirmed (or for no-impact / minor changes, proceed directly):
+- Update `.devAgents/architecture.md` if system design changes
+- Update affected rules files in `.devAgents/rules/`
+- Update `.devAgents/architect-notes.md` with the assessment, decisions, and rationale
+
+## Step 4 — Wrap up
+- Inform the user of the assessment results and any updated artifacts
+- If changes are significant, remind the user that the Tech Lead should re-review implementation plans via `/tl-review-cr`

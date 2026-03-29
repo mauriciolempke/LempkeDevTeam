@@ -21,10 +21,20 @@ Activate the **Tech Lead** role. Read the agent definition from `agents/tech-lea
    b. If failures found: send fixes back to appropriate dev subagent
 6. If ALL tasks pass review and testing:
    - Commit the code (you are the ONLY agent that commits)
+   - **Update Solus DB via MCP** — mark every task in the milestone as done:
+     ```
+     update_task(task_id: <id>, status: "done")   -- for each task
+     ```
+     Then mark the milestone itself as done:
+     ```
+     update_milestone(milestone_id: <id>, status: "done")
+     ```
+     Use the Solus IDs recorded in the task board (from `tl-review-cr` planning). If a task or milestone has no Solus ID, skip the MCP call for that item.
    - Update task board statuses to DONE
    - Report results to user
 7. If a milestone CANNOT be fully completed:
    - Do NOT commit any code
+   - Do NOT update Solus statuses
    - Report the blocking issue to the user
    - Wait for guidance
 8. After retry failure (one retry allowed): escalate to user
