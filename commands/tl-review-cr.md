@@ -35,20 +35,57 @@ list_ideas(project_id: DEFAULT_PROJECT_ID, status: "planned")
   2. ...
   Which idea should be implemented next?
   ```
-- Record the selected idea's `id` and details as the subject for this session.
+- Record the selected idea's `id`, `feature_id`, and details as the subject for this session.
 - Treat the selected idea as the change request to plan implementation for (proceed to Step 2).
+- Set `solus_mode = true`.
 
 **If the user skips:**
 - Fall back to reading `.devAgents/changes/` for unprocessed CRs.
+- Set `solus_mode = false`.
 
 ## Step 2 — Process the change request
 
 For the selected idea (or each unprocessed CR from `.devAgents/changes/`):
 - Assess implementation impact
-- Identify affected milestones and tasks
-- Re-plan task board as needed
+- Decompose into milestones and tasks with clear descriptions, types, priorities, and dependencies
 
-## Step 3 — Update artifacts
-4. Update `.devAgents/tasks/task-board.md` with changes
-5. Update `tech-lead-notes.md`
-6. Report to user: what changed, what milestones are affected, new timeline
+## Step 3 — Persist the plan
+
+### If `solus_mode = true` (idea was picked from Solus):
+
+Create the milestones and tasks directly in the Solus database under the idea's feature, using the MCP server:
+
+**For each milestone:**
+```
+create_milestone(
+  idea_id: <selected_idea_id>,
+  name: "M# — <milestone name>",
+  description: <milestone description>,
+  status: "not_started",
+  target_date: <estimated date if known>
+)
+```
+
+**For each task within that milestone** (use the returned milestone `id`):
+```
+create_task(
+  milestone_id: <milestone_id>,
+  project_id: DEFAULT_PROJECT_ID,
+  name: "T#.# — <task name>",
+  description: <task description>,
+  type: "task",         // or "spike", "bug", "chore"
+  priority: "high",     // "low", "medium", "high", "critical"
+  status: "backlog",
+  position: <sequential integer>
+)
+```
+
+After all records are created, also update `.devAgents/tasks/task-board.md` with a summary entry referencing the Solus IDs, so the file-based board stays in sync.
+
+### If `solus_mode = false` (CR came from `.devAgents/changes/`):
+
+Update `.devAgents/tasks/task-board.md` with the full milestone and task breakdown as normal. Do not write to Solus.
+
+## Step 4 — Wrap up
+- Update `tech-lead-notes.md`
+- Report to user: what milestones and tasks were created, where they were persisted (Solus DB and/or task board), and what agents need to act next
