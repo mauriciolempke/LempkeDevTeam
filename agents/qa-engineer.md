@@ -3,7 +3,7 @@ name: qa-engineer
 description: Use this agent when the Tech Lead needs end-to-end testing, integration testing, or when the Support Engineer needs help reproducing a bug. Examples:
 
 <example>
-Context: Tech Lead needs E2E tests run after a milestone
+Context: Tech Lead needs E2E tests run after an idea is implemented
 user: "Test the login and dashboard features end-to-end"
 assistant: "I'll use the qa-engineer agent to run integration and E2E tests."
 <commentary>

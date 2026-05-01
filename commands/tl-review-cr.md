@@ -1,13 +1,13 @@
 ---
 name: tl-review-cr
-description: Check for new change requests and re-plan affected implementation tasks
+description: Check for new change requests and break each one into tasks attached to the CR's feature in Solus
 ---
 
 Activate the **Tech Lead** role. Read the agent definition from `agents/tech-lead.md`.
 
-1. Read `.devAgents/tech-lead-notes.md` for context
+1. Read `.devAgents/tech-lead-notes.md` for context.
 
-> **Scope:** The Tech Lead only plans and executes work that comes from Change Requests in `.devAgents/changes/`. Ideas and defects from Solus are **not** sourced here — defects are handled by `/tl-defects`, and ideas are the PM's responsibility.
+> **Scope:** The Tech Lead only plans and executes work that comes from Change Requests in `.devAgents/changes/`. Ideas and defects from Solus are sourced via `/tl-plan-ideas` and `/tl-get-defects` respectively. This command produces a flat list of tasks per CR — milestones are no longer used; tasks are persisted to Solus under the **feature** referenced by the CR's idea.
 
 ## Step 1 — Find unprocessed CRs
 
@@ -16,50 +16,74 @@ List all files in `.devAgents/changes/` and identify any that are **not yet proc
 - If no unprocessed CRs exist, inform the user:
   ```
   No unprocessed change requests found in .devAgents/changes/.
-  All CRs are closed. Use /tl-execute or /tl-execute-all to run pending milestones, or /tl-defects to work on accepted defects.
+  All CRs are closed. Use /tl-execute or /tl-execute-all to run ready ideas, or /tl-get-defects to work on accepted defects.
   ```
   Then stop.
 
 ## Step 2 — Process each unprocessed CR
 
 For each unprocessed CR:
-- Read the full CR document
-- Assess implementation impact
-- Decompose into milestones and tasks with clear descriptions, types, priorities, and dependencies
 
-## Step 3 — Persist the plan
+a. Read the full CR document.
 
-Update `.devAgents/tasks/task-board.md` with the full milestone and task breakdown.
+b. If the CR header contains an `idea_id`, fetch the idea to get its `feature_id`:
+   ```
+   get_idea(idea_id: <cr_idea_id>)
+   ```
+   Capture `feature_id`. If the CR has no `idea_id`, you will only update the local task board — Solus writes are skipped for this CR.
 
-**Also create the milestones and tasks in the Solus database** using the MCP server, under the idea referenced in the CR (look for `idea_id` in the CR document):
+c. Decompose the CR into a flat list of concrete tasks. For each task, define:
+   - Task name (short, action-oriented)
+   - Subagent type — `frontend-developer` / `backend-developer` / `data-engineer`
+   - Description — what to build, files in scope, files NOT to touch, acceptance criteria
+   - Dependencies — other tasks in this CR that must finish first
+   - Priority — `high` / `medium` / `low`
+   - Position — sequential integer respecting dependency order
 
-**For each milestone:**
-```
-create_milestone(
-  idea_id: <cr_idea_id>,
-  name: "M# — <milestone name>",
-  description: <milestone description>,
-  status: "not_started",
-  target_date: <estimated date if known>
-)
-```
+> **Apply `superpowers:writing-plans`** when producing the decomposition — every task should have unambiguous scope and observable completion criteria.
 
-**For each task within that milestone** (use the returned milestone `id`):
+## Step 3 — Persist tasks to Solus (per CR with `idea_id`)
+
+For each task produced in Step 2 (only if the CR has an `idea_id` and you have a `feature_id`):
+
 ```
 create_task(
-  milestone_id: <milestone_id>,
   project_id: DEFAULT_PROJECT_ID,
-  name: "T#.# — <task name>",
-  description: <task description>,
+  feature_id: <cr_feature_id>,
+  name: "T# — <task name>",
+  description: <full task description: subagent type, files in scope, dependencies, acceptance criteria>,
   type: "task",
-  priority: "high",
+  priority: <high | medium | low>,
   status: "backlog",
   position: <sequential integer>
 )
 ```
 
-Record all Solus IDs in the task board entry. If the CR has no `idea_id`, skip the Solus DB writes and only update the task board.
+Record every returned task `id`.
 
-## Step 4 — Wrap up
-- Update `tech-lead-notes.md`
-- Report to user: what milestones and tasks were created, where they were persisted, and what agents need to act next
+## Step 4 — Update the local task board
+
+Append a section to `.devAgents/tasks/task-board.md` for this CR:
+
+```
+## CR-NNN — <CR name> (idea_id: <id or "—">, feature: <feature name or "—">)
+
+| Solus Task ID | T# | Name | Subagent | Priority | Depends on | Status |
+|---|---|---|---|---|---|---|
+| <task_id or "—"> | T1 | ... | backend-developer | high | — | backlog |
+| <task_id or "—"> | T2 | ... | frontend-developer | high | T1 | backlog |
+```
+
+If the CR has no `idea_id`, the Solus Task ID column shows `—` and these tasks are tracked locally only.
+
+## Step 5 — Mark the idea ready (when applicable)
+
+If the CR has an `idea_id` and tasks were successfully created in Solus, flip the idea so `/tl-execute` can pick it up:
+```
+update_idea(idea_id: <cr_idea_id>, status: "ready_to_implement")
+```
+
+## Step 6 — Wrap up
+
+- Update `.devAgents/tech-lead-notes.md` with: which CRs were processed, how many tasks each produced, recorded Solus IDs, and any decisions made during decomposition.
+- Report to the user what was created and where, and whether the idea is now `ready_to_implement` for `/tl-execute`.

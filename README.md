@@ -37,7 +37,7 @@ Idea
       └─> Architect       →  Tech stack, system design, rules, guides, scaffolding
            └─> UX Designer →  Figma prompt, screen specs, component specs, design system
                 └─> Data Scientist → Metrics framework, tracking plan, dashboards
-                     └─> Tech Lead  →  Implementation plan, milestone execution (orchestrator)
+                     └─> Tech Lead  →  Task breakdown per feature, idea-by-idea execution (orchestrator)
                           ├─> Frontend Developer  (subagent)
                           ├─> Backend Developer   (subagent)
                           ├─> Data Engineer       (subagent)
@@ -131,18 +131,19 @@ Defines KPIs and success metrics, designs a complete analytics tracking plan wit
 ### Tech Lead
 **Trigger:** After all planning artifacts are ready
 
-Pure orchestrator — never writes code. Reads all upstream artifacts, breaks work into milestones with concrete tasks, spawns developer subagents in parallel, coordinates code review and QA, and is the only agent that commits code to the repository.
+Pure orchestrator — never writes code. Reads all upstream artifacts, breaks each planned idea or CR into a flat list of tasks attached to its **feature** in Solus (no milestones), spawns developer subagents in parallel, coordinates code review and QA, and is the only agent that commits code to the repository.
 
 **Commands:**
 | Command | What it does |
 |---|---|
-| `/tl-plan` | Read all upstream artifacts and produce an implementation plan |
-| `/tl-execute` | Execute the next milestone (spawns subagents in parallel) |
-| `/tl-execute-all` | Execute all remaining milestones without pausing |
-| `/tl-status` | Show task board: running, done, blocked tasks per milestone |
-| `/tl-review-cr` | Assess a change request and re-plan affected tasks |
+| `/tl-plan-ideas` | Pick `planned` ideas from Solus, break each into tasks under its feature |
+| `/tl-execute` | Execute the next `ready_to_implement` idea (spawns subagents in parallel) |
+| `/tl-execute-all` | Execute every `ready_to_implement` idea without pausing |
+| `/tl-status` | Show task board: backlog, in-progress, done, blocked tasks per idea |
+| `/tl-review-cr` | Break a change request into tasks attached to its feature |
+| `/tl-get-defects` | Pick accepted defects from Solus and coordinate the fix |
 
-**Artifacts produced:** `task-board.md`, individual task files, all git commits to the code repository
+**Artifacts produced:** `task-board.md`, individual task files, Solus tasks under features, all git commits to the code repository
 
 ---
 
@@ -162,7 +163,7 @@ Owns the data layer: schema design, migrations, ORM setup, data validation, seed
 ---
 
 ### Code Reviewer *(Tech Lead subagent)*
-Reviews all code produced in a milestone before the Tech Lead commits. Checks rules adherence, test coverage, security (OWASP top 10), performance, consistency, and integration correctness. Reports issues by severity (CRITICAL / WARNING / SUGGESTION). Does not modify code.
+Reviews all code produced for an idea before the Tech Lead commits. Checks rules adherence, test coverage, security (OWASP top 10), performance, consistency, and integration correctness. Reports issues by severity (CRITICAL / WARNING / SUGGESTION). Does not modify code.
 
 ---
 
@@ -245,8 +246,8 @@ All artifacts are stored in `.devAgents/` inside your project:
 4. `/arch-design` — define the tech stack and system architecture
 5. `/ux-figma-prompt` — get a Figma prompt, design your UI, then `/ux-read-figma`
 6. `/ds-analyze` → `/ds-tracking-plan` — define metrics and analytics
-7. `/tl-plan` — create the implementation plan
-8. `/tl-execute` — build milestone by milestone (or `/tl-execute-all` to run all)
+7. `/tl-plan-ideas` — break planned ideas into tasks under their features in Solus
+8. `/tl-execute` — build idea by idea (or `/tl-execute-all` to run all ready ideas)
 9. When things break in production: `/support-diagnose`
 10. When you need to communicate: `/comms-write`
 
